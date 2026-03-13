@@ -1,0 +1,713 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Informe de Visitas al Museo — 2025</title>
+<meta name="description" content="Informe interactivo de visitas al Museo durante 2025.">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
+<link href="https://fonts.googleapis.com/css2?family=Encode+Sans:wght@400;600;700;800&family=Titillium+Web:wght@300;400;600;700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --gold:#D4A843;
+    --gold-light:#F0C060;
+    --gold-pale:rgba(212,168,67,0.12);
+    --navy:#080F1E;
+    --navy-mid:#0B1A35;
+    --navy-card:rgba(11,26,53,0.80);
+    --border:rgba(212,168,67,0.18);
+    --border-bright:rgba(212,168,67,0.38);
+    --text:#F0E6CC;
+    --text-muted:rgba(240,230,204,0.62);
+    --text-dim:rgba(240,230,204,0.42);
+    --cyan:#2563EB;
+    --teal:#0F766E;
+    --amber:#D97706;
+    --green:#16A34A;
+    --red:#DC2626;
+    --purple:#7C3AED;
+    --ink:#F0E6CC;
+    --ink-soft:rgba(240,230,204,0.74);
+    --ink-dim:rgba(240,230,204,0.52);
+    --radius:10px;
+    --glass:rgba(11,26,53,0.84);
+    --glass-border:rgba(212,168,67,0.18);
+    --shadow:0 18px 40px rgba(0,0,0,0.28), 0 2px 8px rgba(0,0,0,0.18);
+  }
+  *,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
+  html { scroll-behavior: smooth; }
+
+  body {
+    background-image: url('assets/background.jpg');
+    background-size: cover;
+    background-attachment: fixed;
+    background-position: center;
+    color: var(--text);
+    font-family: 'Titillium Web', sans-serif;
+    font-size: 14.5px;
+    line-height: 1.65;
+    position: relative;
+  }
+  body::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background: linear-gradient(180deg,rgba(8,15,30,.44) 0%,rgba(8,15,30,.86) 58%,rgba(8,15,30,.94) 100%);
+    z-index: 0;
+    pointer-events: none;
+  }
+  header, nav, .content, footer {
+    position: relative;
+    z-index: 1;
+  }
+
+  /* ── HEADER ── */
+  .site-header{
+    background: rgba(8,15,30,0.68);
+    backdrop-filter: blur(16px);
+    -webkit-backdrop-filter: blur(16px);
+    border-bottom: 1px solid var(--border);
+    padding: 52px 56px 44px;
+    max-width: 900px;
+    margin: 0 auto;
+    border-radius: 0 0 12px 12px;
+  }
+  .header-eyebrow{font-size:11px;font-weight:700;letter-spacing:.2em;text-transform:uppercase;color:var(--gold);margin-bottom:14px;}
+  .header-title{font-family:'Encode Sans',sans-serif;font-size:clamp(26px,4vw,44px);font-weight:800;line-height:1.1;color:var(--text);margin-bottom:12px;}
+  .header-sub{color:var(--text-muted);font-size:15px;max-width:540px;font-weight:400;}
+  .kpi-row{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:0;margin-top:44px;padding-top:32px;border-top:1px solid var(--border);}
+  .kpi{padding:0 24px 0 0;border-right:1px solid rgba(255,255,255,0.15);}
+  .kpi:last-child{border-right:none;}
+  .kpi-num{font-family:'Encode Sans',sans-serif;font-size:30px;font-weight:800;color:var(--text);line-height:1;margin-bottom:4px;}
+  .kpi-label{font-size:11px;color:var(--text-dim);font-weight:500;letter-spacing:.04em;text-transform:uppercase;}
+
+  /* ── NAV ── */
+  .toc{
+    background: rgba(8,15,30,0.88);
+    backdrop-filter: blur(14px);
+    -webkit-backdrop-filter: blur(14px);
+    border-bottom: 1px solid var(--border);
+    padding: 14px 56px;
+    position: sticky;
+    top: 0;
+    z-index: 100;
+    max-width: 900px;
+    margin: 0 auto;
+  }
+  .toc-links{display:flex;flex-wrap:wrap;gap:4px 6px;}
+  .toc-links a{color:var(--text-muted);text-decoration:none;font-size:12px;font-weight:600;padding:4px 11px;border-radius:20px;transition:all .18s ease;border:1px solid transparent;}
+  .toc-links a:hover,.toc-links a.active{background:rgba(212,168,67,0.10);color:var(--text);border-color:var(--border-bright);}
+
+  /* ── CONTENT ── */
+  .content{max-width:900px;margin:0 auto;padding:0 24px 80px;}
+  .section{margin-top:56px;scroll-margin-top:72px;}
+  .section-eyebrow{font-size:10.5px;font-weight:700;letter-spacing:.22em;text-transform:uppercase;color:var(--gold);margin-bottom:6px;text-shadow:0 1px 4px rgba(0,0,0,0.5);}
+  .section-title{
+    font-family:'Encode Sans',sans-serif;font-size:20px;font-weight:800;color:var(--text);
+    margin-bottom:24px;padding-bottom:12px;
+    border-bottom:2px solid var(--border);
+    text-shadow: 0 1px 6px rgba(0,0,0,0.3);
+  }
+  .charts-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(380px,1fr));gap:18px;}
+  .chart-card{
+    background: var(--glass);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    border-radius: var(--radius);
+    padding: 24px 24px 20px;
+    box-shadow: var(--shadow);
+    border: 1px solid var(--glass-border);
+    border-top: 6px solid rgba(212,168,67,0.72);
+    display: flex;
+    flex-direction: column;
+  }
+  .chart-card.wide{grid-column:1/-1;}
+  .chart-title{font-family:'Encode Sans',sans-serif;font-size:13px;font-weight:700;color:var(--gold);margin-bottom:16px;letter-spacing:.01em;}
+  .chart-wrap{position:relative;flex:1;}
+  .chart-wrap canvas{width:100%!important;}
+  .insight{margin-top:14px;padding:11px 14px;background:rgba(212,168,67,0.08);border-left:3px solid var(--gold);border-radius:0 6px 6px 0;font-size:13px;color:var(--ink-soft);line-height:1.55;}
+  .insight strong{color:var(--gold);font-weight:700;}
+
+  /* ── HIGHLIGHT ── */
+  .highlight{background:var(--gold);color:var(--navy);font-weight:700;padding:2px 6px;border-radius:3px;}
+
+  /* ── CONCLUSION ── */
+  .conclusion-section{
+    margin-top:56px;
+    background: rgba(0,0,0,0.75);
+    backdrop-filter: blur(16px);
+    -webkit-backdrop-filter: blur(16px);
+    color:#f9fafb;
+    border-radius:12px;
+    padding:44px;
+    scroll-margin-top:72px;
+    border:1px solid rgba(255,255,255,0.12);
+    border-top:6px solid #c9b77a;
+  }
+  .conclusion-section .section-eyebrow{color:var(--gold);}
+  .conclusion-section .section-title{font-family:'Encode Sans',sans-serif;color:#fff;border-color:rgba(255,255,255,0.15);font-size:24px;margin-bottom:28px;text-shadow:none;}
+  .findings{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:14px;}
+  .finding{background:rgba(255,255,255,0.06);border:1px solid rgba(255,255,255,0.1);border-radius:8px;padding:20px;border-top:4px solid #6f8fa8;}
+  .finding-num{font-family:'Encode Sans',sans-serif;font-size:28px;font-weight:800;color:var(--gold);line-height:1;margin-bottom:10px;}
+  .finding-text{font-size:13px;color:#cfd6dc;line-height:1.6;}
+  .finding-text strong{color:var(--text);font-weight:700;}
+  .footer{text-align:center;padding:36px;color:rgba(255,255,255,0.4);font-size:12px;position:relative;z-index:1;}
+  @media(max-width:700px){.site-header,.toc{padding-left:16px;padding-right:16px;}.content{padding-left:16px;padding-right:16px;}.charts-grid{grid-template-columns:1fr;}}
+</style>
+</head>
+<body>
+
+<header class="site-header">
+  <p class="header-eyebrow">Análisis de Datos · 2025</p>
+  <h1 class="header-title">Informe de Visitas al Museo</h1>
+  <p class="header-sub">Análisis completo del flujo de visitantes, comportamiento de grupos, rendimiento operativo y perfil de nacionalidades — 2025.</p>
+  <div class="kpi-row">
+    <div class="kpi"><div class="kpi-num">35.762</div><div class="kpi-label">Visitantes totales</div></div>
+    <div class="kpi"><div class="kpi-num">2.137</div><div class="kpi-label">Registros de visitas</div></div>
+    <div class="kpi"><div class="kpi-num">15.701</div><div class="kpi-label">Visitantes programados</div></div>
+    <div class="kpi"><div class="kpi-num">56+</div><div class="kpi-label">Nacionalidades</div></div>
+    <div class="kpi"><div class="kpi-num">30 min</div><div class="kpi-label">Duración estándar</div></div>
+  </div>
+</header>
+
+<nav class="toc">
+  <div class="toc-links">
+    <a href="#sec-general">1. Visitas por mes</a>
+    <a href="#sec-tipo">2. Tipo de visita</a>
+    <a href="#sec-origen">3. Origen del público</a>
+    <a href="#sec-institucion">4. Institución</a>
+    <a href="#sec-tiempo">5. Tiempo y horario</a>
+    <a href="#sec-nacionalidad">6. Nacionalidades</a>
+    <a href="#sec-guias">7. Guías</a>
+    <a href="#sec-relaciones">8. Relaciones entre variables</a>
+    <a href="#sec-avanzados">9. Análisis avanzados</a>
+    <a href="#sec-conclusion">10. Conclusión general</a>
+  </div>
+</nav>
+
+<div class="content">
+
+<!-- ═══ 1. MES ═══ -->
+<section class="section" id="sec-general">
+  <p class="section-eyebrow">Sección 1 — Visión General</p>
+  <h2 class="section-title">Visitantes por mes</h2>
+  <div class="charts-grid">
+    <div class="chart-card wide">
+      <h3 class="chart-title">Total de visitantes por mes (2025)</h3>
+      <div class="chart-wrap" style="height:320px"><canvas id="ch-mes-bar"></canvas></div>
+      <div class="insight"><strong>Octubre lidera con 5.016 visitantes</strong>, más del doble del promedio mensual (2.980). Los meses de alta afluencia se concentran en el segundo semestre (agosto–noviembre). Diciembre cae a 868 al cierre del ciclo escolar. El período mayo–noviembre configura la temporada alta del museo.</div>
+    </div>
+    <div class="chart-card wide">
+      <h3 class="chart-title">Evolución acumulada de visitantes</h3>
+      <div class="chart-wrap" style="height:260px"><canvas id="ch-acumulado"></canvas></div>
+      <div class="insight">La curva acumulada muestra una aceleración notable a partir de <strong>marzo</strong>, con saltos pronunciados en mayo, agosto y octubre. El umbral de los 20.000 visitantes acumulados se superó aproximadamente en el mes de agosto.</div>
+    </div>
+  </div>
+</section>
+
+<!-- ═══ 2. TIPO ═══ -->
+<section class="section" id="sec-tipo">
+  <p class="section-eyebrow">Sección 2 — Tipo de Visita</p>
+  <h2 class="section-title">Visitas programadas vs. espontáneas</h2>
+  <div class="charts-grid">
+    <div class="chart-card">
+      <h3 class="chart-title">Visitantes por tipo de visita</h3>
+      <div class="chart-wrap" style="height:260px"><canvas id="ch-tipo-pie"></canvas></div>
+      <div class="insight">Las <strong>visitas programadas representan el 67,3 % de los visitantes</strong> (15.701 personas), frente al 32,7 % espontáneas (7.620). Esto confirma una demanda organizada y planificable que favorece la gestión de recursos.</div>
+    </div>
+    <div class="chart-card">
+      <h3 class="chart-title">Visitantes programados vs. espontáneos por mes</h3>
+      <div class="chart-wrap" style="height:260px"><canvas id="ch-tipo-mes"></canvas></div>
+      <div class="insight">Las <strong>visitas programadas dominan en casi todos los meses</strong>, con pico en octubre (3.058). En enero y febrero el flujo espontáneo tiene mayor peso relativo, probablemente por turismo de verano. Diciembre es el único mes donde ambos tipos quedan casi igualados.</div>
+    </div>
+  </div>
+</section>
+
+<!-- ═══ 3. ORIGEN ═══ -->
+<section class="section" id="sec-origen">
+  <p class="section-eyebrow">Sección 3 — Origen del Público</p>
+  <h2 class="section-title">Perfil de origen de los visitantes</h2>
+  <div class="charts-grid">
+    <div class="chart-card">
+      <h3 class="chart-title">Visitantes por origen — totales</h3>
+      <div class="chart-wrap" style="height:280px"><canvas id="ch-origen-bar"></canvas></div>
+      <div class="insight"><strong>ENTE lidera con 8.628 visitantes</strong> (24,1 %), seguido por Residentes (6.392, 17,9 %) y Extranjeros (5.609, 15,7 %). <em>La categoría "Residente y Extranjero" (9.402, 26,3 %) agrupa grupos mixtos de clasificación difusa; su interpretación debe tomarse con cautela.</em></div>
+    </div>
+    <div class="chart-card">
+      <h3 class="chart-title">Visitantes por origen — evolución mensual</h3>
+      <div class="chart-wrap" style="height:280px"><canvas id="ch-origen-mes"></canvas></div>
+      <div class="insight">Los <strong>residentes concentran su presencia en julio y septiembre</strong> (período escolar), mientras los extranjeros tienen pico en octubre (972). ENTE muestra presencia constante y elevada, con picos en marzo, agosto y octubre–noviembre.</div>
+    </div>
+  </div>
+</section>
+
+<!-- ═══ 4. INSTITUCIÓN ═══ -->
+<section class="section" id="sec-institucion">
+  <p class="section-eyebrow">Sección 4 — Institución</p>
+  <h2 class="section-title">Tipo de institución visitante</h2>
+  <div class="charts-grid">
+    <div class="chart-card">
+      <h3 class="chart-title">Total de visitantes por tipo de institución</h3>
+      <div class="chart-wrap" style="height:280px"><canvas id="ch-inst-pie"></canvas></div>
+      <div class="insight">Los <strong>Colegios aportan 12.857 visitantes (35,9 %)</strong> del total, siendo la categoría institucional más relevante. "Otros" (grupos no institucionales) representa el 56,1 % en volumen bruto, pero con un tamaño de grupo muy inferior. Universidades (6,4 %) y Terciarios (1,5 %) completan el cuadro.</div>
+    </div>
+    <div class="chart-card">
+      <h3 class="chart-title">Tamaño promedio de grupo por institución</h3>
+      <div class="chart-wrap" style="height:280px"><canvas id="ch-inst-prom"></canvas></div>
+      <div class="insight">Los <strong>Terciarios traen los grupos más numerosos</strong> en promedio (50 personas por visita), seguidos por Universidades (35) y Colegios (31). Las visitas terciarias y universitarias tienen el mayor impacto puntual en el flujo diario de visitantes.</div>
+    </div>
+    <div class="chart-card wide">
+      <h3 class="chart-title">Proporción de visitantes por institución identificada — excluye "Otros"</h3>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:32px;align-items:center;">
+        <div class="chart-wrap" style="height:320px"><canvas id="ch-inst-sin-otros"></canvas></div>
+        <div>
+          <div style="margin-bottom:24px;">
+            <div style="font-size:13px;color:#6b7280;text-transform:uppercase;letter-spacing:.1em;font-weight:600;margin-bottom:8px;">Total visitantes clasificados</div>
+            <div style="font-family:'Encode Sans',sans-serif;font-size:48px;font-weight:800;color:var(--gold);line-height:1;">15.706</div>
+            <div style="font-size:13px;color:#9ea7b0;margin-top:4px;">(excluye 20.056 de categoría "Otros")</div>
+          </div>
+          <div style="display:flex;flex-direction:column;gap:12px;">
+            <div style="background:rgba(0,114,187,0.08);border-radius:8px;padding:14px 16px;border-left:4px solid #6f8fa8;">
+              <div style="font-size:12px;color:#6b7280;font-weight:600;letter-spacing:.08em;text-transform:uppercase;">Colegio</div>
+              <div style="font-family:'Encode Sans',sans-serif;font-size:28px;color:var(--gold);line-height:1.1;">81,9%</div>
+              <div style="font-size:13px;color:#6b7280;margin-top:2px;">12.857 visitantes · <strong>el segmento dominante</strong></div>
+            </div>
+            <div style="background:#f4f7f5;border-radius:8px;padding:14px 16px;border-left:4px solid #7aa58c;">
+              <div style="font-size:12px;color:#6b7280;font-weight:600;letter-spacing:.08em;text-transform:uppercase;">Universidad</div>
+              <div style="font-family:'Encode Sans',sans-serif;font-size:28px;color:#7aa58c;line-height:1.1;">14,6%</div>
+              <div style="font-size:13px;color:#6b7280;margin-top:2px;">2.299 visitantes</div>
+            </div>
+            <div style="background:#f5f1e6;border-radius:8px;padding:14px 16px;border-left:4px solid #c9b77a;">
+              <div style="font-size:12px;color:#6b7280;font-weight:600;letter-spacing:.08em;text-transform:uppercase;">Terciario</div>
+              <div style="font-family:'Encode Sans',sans-serif;font-size:28px;color:var(--gold);line-height:1.1;">3,5%</div>
+              <div style="font-size:13px;color:#6b7280;margin-top:2px;">550 visitantes</div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="insight" style="margin-top:22px;">Excluyendo la categoría "Otros", <strong>los Colegios representan el 81,9 % del universo institucional clasificado</strong>. La relación entre colegios y la siguiente categoría (Universidades, 14,6 %) es de casi 6 a 1. <strong>4 de cada 5 visitantes institucionales identificados provienen de colegios</strong>, confirmando que la captación escolar es el motor central del museo.</div>
+    </div>
+  </div>
+</section>
+
+<!-- ═══ 5. TIEMPO ═══ -->
+<section class="section" id="sec-tiempo">
+  <p class="section-eyebrow">Sección 5 — Distribución Temporal</p>
+  <h2 class="section-title">Patrones de tiempo y horario</h2>
+  <div class="charts-grid">
+    <div class="chart-card">
+      <h3 class="chart-title">Visitantes por día de la semana</h3>
+      <div class="chart-wrap" style="height:280px"><canvas id="ch-dia-bar"></canvas></div>
+      <div class="insight"><strong>Sábado (9.344), jueves (8.415) y miércoles (8.403)</strong> lideran la semana, concentrando el 73 % del total. El sábado supera a los días hábiles, reflejando una fuerte presencia de visitas libres y turismo de fin de semana. Martes y domingo tienen actividad mínima.</div>
+    </div>
+    <div class="chart-card">
+      <h3 class="chart-title">Visitantes por horario de inicio de visita</h3>
+      <div class="chart-wrap" style="height:280px"><canvas id="ch-hora-bar"></canvas></div>
+      <div class="insight">El horario de las <strong>14:00 h es el más concurrido (6.511 visitantes)</strong>, seguido de cerca por las 10:00 h (6.072). La distribución es más equilibrada entre mañana y tarde que en períodos anteriores, con uso sostenido del turno vespertino hasta las 16 h.</div>
+    </div>
+    <div class="chart-card wide">
+      <h3 class="chart-title">Visitantes por semana ISO — evolución anual (2025)</h3>
+      <div class="chart-wrap" style="height:280px"><canvas id="ch-semana-line"></canvas></div>
+      <div class="insight">La semana 44 (octubre) registra el máximo absoluto con 1.451 visitantes. Se observan <strong>tres valles claros</strong>: semanas 9–10 (carnaval), semana 18 (Semana Santa) y semana 31 (receso invernal). El otoño tardío y la primavera configuran los períodos de mayor afluencia.</div>
+    </div>
+  </div>
+</section>
+
+<!-- ═══ 6. NACIONALIDADES ═══ -->
+<section class="section" id="sec-nacionalidad">
+  <p class="section-eyebrow">Sección 6 — Análisis de Nacionalidades</p>
+  <h2 class="section-title">Perfil internacional de visitantes</h2>
+  <p style="color:var(--ink-light);font-size:13.5px;margin-bottom:28px;max-width:780px;">Datos extraídos del campo <em>Observaciones</em>, donde los guías registran la procedencia de los visitantes extranjeros. Se identificaron <strong>4.296 personas</strong> en 56 nacionalidades distintas. Esta cifra es parcial: solo cubre registros con observación escrita.</p>
+  <div class="charts-grid">
+    <div class="chart-card wide">
+      <h3 class="chart-title">Top 20 nacionalidades extranjeras — personas registradas</h3>
+      <div class="chart-wrap" style="height:380px"><canvas id="ch-nac-top20"></canvas></div>
+      <div class="insight"><strong>EE.UU. lidera con 904 personas</strong> (21 % del total identificado), seguido por Italia (451) y Brasil (429). Los primeros 5 países concentran el 56 % del total. La fuerte presencia norteamericana refleja el turismo universitario que visita Buenos Aires, coherente con los numerosos grupos universitarios registrados en el dataset.</div>
+    </div>
+    <div class="chart-card">
+      <h3 class="chart-title">Visitantes extranjeros por región de origen</h3>
+      <div class="chart-wrap" style="height:300px"><canvas id="ch-region-pie"></canvas></div>
+      <div class="insight"><strong>Europa representa el 48 % del turismo internacional identificado</strong> (2.043 personas), seguida por América del Norte (23 %) y América del Sur (22 %). La presencia de Oceanía y Asia es pequeña pero consistente. El museo recibe visitantes de todos los continentes habitados.</div>
+    </div>
+    <div class="chart-card">
+      <h3 class="chart-title">Top 10 países — peso relativo sobre total identificado</h3>
+      <div class="chart-wrap" style="height:300px"><canvas id="ch-nac-pct"></canvas></div>
+      <div class="insight">El <strong>top 10 de países concentra el 75 % del turismo internacional registrado</strong>. Más allá de EE.UU., la presencia europea es diversa: Italia, España, Francia, Reino Unido, Alemania y Holanda aparecen entre los primeros 10 sin que ningún país europeo individual domine en forma aislada.</div>
+    </div>
+    <div class="chart-card wide">
+      <h3 class="chart-title">Mapa mundial de visitantes por país de origen</h3>
+      <div id="worldmap-wrap" style="width:100%;height:480px;position:relative;background:#edf1f4;border-radius:8px;overflow:hidden;"></div>
+      <div style="margin-top:12px;display:flex;align-items:center;gap:12px;flex-wrap:wrap;">
+        <span style="font-size:12px;color:#635d56;font-weight:600;">Visitantes:</span>
+        <div style="display:flex;align-items:center;gap:6px;">
+          <div style="width:120px;height:12px;border-radius:3px;background:linear-gradient(to right,#d6e0e7,#6c8798);"></div>
+          <span style="font-size:11px;color:#635d56;">1 → 904</span>
+        </div>
+        <span style="font-size:11px;color:#a09890;">Hover sobre cada país para ver el detalle.</span>
+      </div>
+      <div class="insight" style="margin-top:14px;"><strong>EE.UU., Italia, Brasil y España</strong> son los focos más intensos del mapa. Europa aparece densamente coloreada en su conjunto. América del Sur muestra presencia moderada con Brasil y Colombia liderando la región. Asia y África mantienen una presencia menor pero existente, confirmando el alcance verdaderamente global del museo.</div>
+    </div>
+  </div>
+</section>
+
+<!-- ═══ 7. GUÍAS ═══ -->
+<section class="section" id="sec-guias">
+  <p class="section-eyebrow">Sección 7 — Guías / Referentes</p>
+  <h2 class="section-title">Desempeño de los guías</h2>
+  <div class="charts-grid">
+    <div class="chart-card wide">
+      <h3 class="chart-title">Visitantes totales por guía principal (con referente asignado)</h3>
+      <div class="chart-wrap" style="height:300px"><canvas id="ch-guias-bar"></canvas></div>
+      <div class="insight"><strong>Pablo lidera con 4.264 visitantes</strong>, seguido por Valen (3.725) y Seba (3.037). Los cinco guías principales concentran más del 88 % del total con guía asignado. El 49 % de los registros no tiene referente asignado (17.604 visitantes), lo que sugiere un área de mejora en el sistema de registro.</div>
+    </div>
+  </div>
+</section>
+
+<!-- ═══ 8. RELACIONES ═══ -->
+<section class="section" id="sec-relaciones">
+  <p class="section-eyebrow">Sección 8 — Relaciones entre Variables</p>
+  <h2 class="section-title">Cruces y correlaciones</h2>
+  <div class="charts-grid">
+    <div class="chart-card">
+      <h3 class="chart-title">Institución × Tipo de visita (visitantes)</h3>
+      <div class="chart-wrap" style="height:280px"><canvas id="ch-inst-tipo"></canvas></div>
+      <div class="insight">Los <strong>Colegios son casi exclusivamente programados</strong> (9.901 vs. 2.228 espontáneos). "Otros" tiene una proporción alta de espontáneos (57,5 %), coherente con grupos de turistas sin coordinación previa. Universidades y Terciarios son principalmente programados.</div>
+    </div>
+    <div class="chart-card">
+      <h3 class="chart-title">Día de semana × Tipo de visita (visitantes estimados)</h3>
+      <div class="chart-wrap" style="height:280px"><canvas id="ch-dia-tipo"></canvas></div>
+      <div class="insight">Las <strong>visitas programadas dominan jueves, miércoles y viernes</strong>, días escolares de mayor actividad. El sábado tiene perfil más espontáneo (~6.500 espontáneas vs. ~2.800 programadas), coherente con visitantes libres de fin de semana.</div>
+    </div>
+    <div class="chart-card wide">
+      <h3 class="chart-title">Origen del público × Mes (excluye "Residente y Extranjero")</h3>
+      <div class="chart-wrap" style="height:320px"><canvas id="ch-heatmap"></canvas></div>
+      <div class="insight">ENTE muestra el mayor volumen en marzo (1.086) y picos en agosto y octubre–noviembre. Los <strong>residentes dominan julio–septiembre</strong> (calendario escolar), mientras los extranjeros tienen su techo en octubre (972). La curva de ENTE tiene estacionalidad propia, ligada a programas institucionales específicos.</div>
+    </div>
+  </div>
+</section>
+
+<!-- ═══ 9. AVANZADOS ═══ -->
+<section class="section" id="sec-avanzados">
+  <p class="section-eyebrow">Sección 9 — Análisis Avanzados</p>
+  <h2 class="section-title">Patrones no obvios y profundidad analítica</h2>
+  <div class="charts-grid">
+    <div class="chart-card wide">
+      <h3 class="chart-title">Guías: volumen total vs. promedio por visita (burbuja)</h3>
+      <div class="chart-wrap" style="height:360px"><canvas id="ch-bubble"></canvas></div>
+      <div class="insight"><strong>Pablo y Valen tienen el mayor volumen total</strong> pero con tamaños de grupo diferentes. Guille y Poli exhiben un promedio alto por visita, manejando grupos más numerosos. Nahue y Seba equilibran volumen y tamaño de grupo. El equipo muestra perfiles complementarios que pueden aprovecharse estratégicamente.</div>
+    </div>
+    <div class="chart-card">
+      <h3 class="chart-title">Residentes vs. extranjeros — autoguiados y audioguías</h3>
+      <div class="chart-wrap" style="height:280px"><canvas id="ch-res-ext-bar"></canvas></div>
+      <div class="insight">Los <strong>residentes autoguiados superan ampliamente a los extranjeros</strong> (5.643 vs. 3.867). Sin embargo, los extranjeros usan audioguías en mayor proporción relativa (643 vs. 75). Existe una oportunidad clara de ampliar la oferta de audioguías en inglés, italiano y francés.</div>
+    </div>
+    <div class="chart-card">
+      <h3 class="chart-title">Índice de programación mensual (% programados sobre total)</h3>
+      <div class="chart-wrap" style="height:280px"><canvas id="ch-indice-prog"></canvas></div>
+      <div class="insight">El índice varía del <strong>12 % (enero) al 71 % (junio)</strong>. En los meses de alta temporada turística (enero–febrero) predominan las espontáneas; durante el ciclo escolar (marzo–noviembre) el índice trepa al 55–71 %. Este patrón es clave para planificar la disponibilidad de guías.</div>
+    </div>
+  </div>
+</section>
+
+<!-- ═══ 10. CONCLUSIÓN ═══ -->
+<section class="section conclusion-section" id="sec-conclusion">
+  <p class="section-eyebrow">Conclusión General</p>
+  <h2 class="section-title">7 hallazgos clave para la toma de decisiones</h2>
+  <div class="findings">
+    <div class="finding">
+      <div class="finding-num">01</div>
+      <div class="finding-text"><strong>Octubre es el mes crítico</strong> con 5.016 visitantes, casi el doble del promedio mensual. El trimestre agosto–octubre concentra el 32 % del total anual y requiere máxima capacidad operativa.</div>
+    </div>
+    <div class="finding">
+      <div class="finding-num">02</div>
+      <div class="finding-text"><strong>Los colegios son el motor principal:</strong> 81,9 % de los visitantes institucionales identificados (12.857 personas). Fortalecer la relación con instituciones educativas es la palanca de crecimiento más directa.</div>
+    </div>
+    <div class="finding">
+      <div class="finding-num">03</div>
+      <div class="finding-text"><strong>EE.UU. lidera el turismo internacional</strong> con 904 personas (21 % del total identificado). Europa representa el 48 % del flujo extranjero, con Italia, España y Francia como principales emisores europeos.</div>
+    </div>
+    <div class="finding">
+      <div class="finding-num">04</div>
+      <div class="finding-text"><strong>El sábado superó a los días hábiles</strong> con 9.344 visitantes. Indica un perfil espontáneo de fin de semana relevante que debe contemplarse en la dotación de guías disponibles.</div>
+    </div>
+    <div class="finding">
+      <div class="finding-num">05</div>
+      <div class="finding-text"><strong>5 guías manejan el 88 % del volumen</strong> con referente asignado. El 49 % de los registros no tiene guía asignado —área crítica de mejora en el sistema de registro.</div>
+    </div>
+    <div class="finding">
+      <div class="finding-num">06</div>
+      <div class="finding-text"><strong>Las audioguías están subutilizadas</strong>: solo 718 personas las usaron (2 % del total). Dado el fuerte flujo de europeos y norteamericanos, ampliar la oferta en inglés, italiano y francés es una oportunidad concreta de mejora.</div>
+    </div>
+    <div class="finding">
+      <div class="finding-num">07</div>
+      <div class="finding-text"><strong>ENTE es el mayor canal individual</strong> con 8.628 visitantes (24 % del total), superando a residentes y extranjeros por separado. Consolidar y profundizar este canal es estratégicamente prioritario.</div>
+    </div>
+  </div>
+</section>
+
+</div>
+
+<footer class="footer">
+  Informe generado a partir de BD_VISITAS_MUSEO_FINAL.xlsx · 2.137 registros · 2025
+</footer>
+
+<script>
+Chart.defaults.font.family = "'Titillium Web', sans-serif";
+Chart.defaults.color = '#d3deeb';
+Chart.defaults.borderColor = 'rgba(212,168,67,0.12)';
+
+const C = { r:'#2563EB', b:'#0F766E', o:'#D97706', g:'#16A34A', v:'#7C3AED', d:'#0B1A35', n:'#D4A843' };
+
+function topBarPlugin(color) {
+  return { afterDatasetsDraw(chart) {
+    const ctx = chart.ctx;
+    chart.data.datasets.forEach((ds, di) => {
+      chart.getDatasetMeta(di).data.forEach((bar, i) => {
+        if (!ds.data[i]) return;
+        ctx.save(); ctx.fillStyle = color||'rgba(240,230,204,0.76)'; ctx.font='600 11px Titillium Web';
+        ctx.textAlign='center'; ctx.fillText(Number(ds.data[i]).toLocaleString('es-AR'), bar.x, bar.y-7);
+        ctx.restore();
+      });
+    });
+  }};
+}
+
+// 1 MES BAR
+new Chart('ch-mes-bar',{type:'bar',data:{labels:['Ene','Feb','Mar','Abr','May','Jun','Jul','Ago','Sep','Oct','Nov','Dic'],datasets:[{data:[2502,1846,3440,2831,3131,3285,3025,3282,3131,5016,3405,868],backgroundColor:['#2563EB','#2563EB','#0B1A35','#0B1A35','#0F766E','#0F766E','#2563EB','#0B1A35','#0F766E','#7C3AED','#7C3AED','#D4A843'],borderRadius:6,borderSkipped:false}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},scales:{y:{grid:{color:'rgba(212,168,67,0.12)'},beginAtZero:true},x:{grid:{display:false}}}},plugins:[topBarPlugin()]});
+
+// 1 ACUMULADO
+const mesV=[2502,1846,3440,2831,3131,3285,3025,3282,3131,5016,3405,868];
+let a=0; const acD=mesV.map(v=>a+=v);
+new Chart('ch-acumulado',{type:'line',data:{labels:['Ene','Feb','Mar','Abr','May','Jun','Jul','Ago','Sep','Oct','Nov','Dic'],datasets:[{data:acD,borderColor:C.r,backgroundColor:'rgba(37, 99, 235, 0.18)',borderWidth:2.5,pointRadius:5,pointBackgroundColor:C.r,fill:true,tension:0.35}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},scales:{y:{grid:{color:'rgba(212,168,67,0.12)'},beginAtZero:true,ticks:{callback:v=>v.toLocaleString('es-AR')}},x:{grid:{display:false}}}},plugins:[{afterDatasetsDraw(chart){const ctx=chart.ctx;chart.data.datasets.forEach((ds,di)=>{chart.getDatasetMeta(di).data.forEach((pt,i)=>{ctx.save();ctx.fillStyle=C.r;ctx.font='600 11px Titillium Web';ctx.textAlign='center';ctx.fillText(ds.data[i].toLocaleString('es-AR'),pt.x,pt.y-10);ctx.restore();});});}}]});
+
+// 2 TIPO PIE
+new Chart('ch-tipo-pie',{type:'doughnut',data:{labels:['Programada','Espontánea'],datasets:[{data:[15701,7620],backgroundColor:[C.r,C.o],borderWidth:3,borderColor:'rgba(8,15,30,0.92)'}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{position:'bottom'},tooltip:{callbacks:{label(c){const p=((c.parsed/23321)*100).toFixed(1);return ` ${c.parsed.toLocaleString('es-AR')} (${p}%)`}}}}},plugins:[{afterDatasetsDraw(chart){const ctx=chart.ctx,{width,height}=chart;ctx.save();ctx.font='800 22px Encode Sans';ctx.fillStyle=C.r;ctx.textAlign='center';ctx.textBaseline='middle';ctx.fillText('67,3%',width/2,height/2-28);ctx.font='12px Titillium Web';ctx.fillStyle='#F0E6CC';ctx.fillText('programadas',width/2,height/2-6);ctx.restore();}}]});
+
+// 2 TIPO x MES
+new Chart('ch-tipo-mes',{type:'bar',data:{labels:['Ene','Feb','Mar','Abr','May','Jun','Jul','Ago','Sep','Oct','Nov','Dic'],datasets:[{label:'Programada',data:[298,174,1024,1436,1846,1834,1146,1837,1526,3058,1402,120],backgroundColor:C.r,borderRadius:4},{label:'Espontánea',data:[672,426,975,650,686,498,521,557,706,1096,711,122],backgroundColor:C.o,borderRadius:4}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{position:'bottom'}},scales:{x:{grid:{display:false}},y:{grid:{color:'rgba(212,168,67,0.12)'},beginAtZero:true}}}});
+
+// 3 ORIGEN BAR
+new Chart('ch-origen-bar',{type:'bar',data:{labels:['ENTE','Residente','Extranjero','Resid. y Extr. *'],datasets:[{data:[8628,6392,5609,9402],backgroundColor:[C.d,C.g,C.r,C.n],borderRadius:6}]},options:{responsive:true,maintainAspectRatio:false,indexAxis:'y',plugins:{legend:{display:false}},scales:{x:{grid:{color:'rgba(212,168,67,0.12)'},beginAtZero:true},y:{grid:{display:false}}}},plugins:[{afterDatasetsDraw(chart){const ctx=chart.ctx;chart.data.datasets.forEach((ds,di)=>{chart.getDatasetMeta(di).data.forEach((bar,i)=>{ctx.save();ctx.fillStyle='rgba(240,230,204,0.76)';ctx.font='600 12px Titillium Web';ctx.textAlign='left';ctx.textBaseline='middle';ctx.fillText(ds.data[i].toLocaleString('es-AR'),bar.x+8,bar.y);ctx.restore();});});}}]});
+
+// 3 ORIGEN x MES
+new Chart('ch-origen-mes',{type:'line',data:{labels:['Ene','Feb','Mar','Abr','May','Jun','Jul','Ago','Sep','Oct','Nov','Dic'],datasets:[{label:'ENTE',data:[761,617,1086,258,470,718,499,906,968,1044,1056,245],borderColor:C.d,borderWidth:2,pointRadius:4,tension:0.3,backgroundColor:'transparent'},{label:'Extranjero',data:[548,351,305,435,559,585,260,491,190,972,655,258],borderColor:C.r,borderWidth:2,pointRadius:4,tension:0.3,backgroundColor:'transparent'},{label:'Residente',data:[226,259,767,803,440,533,949,430,691,735,515,44],borderColor:C.g,borderWidth:2,pointRadius:4,tension:0.3,backgroundColor:'transparent'},{label:'Resid. y Extr. *',data:[821,503,843,980,936,431,925,862,601,1124,1094,282],borderColor:C.n,borderWidth:1.5,borderDash:[5,4],pointRadius:3,tension:0.3,backgroundColor:'transparent'}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{position:'bottom'}},scales:{y:{grid:{color:'rgba(212,168,67,0.12)'},beginAtZero:true},x:{grid:{display:false}}}}});
+
+// 4 INST PIE (por total de visitantes)
+new Chart('ch-inst-pie',{type:'doughnut',data:{labels:['Otros','Colegio','Universidad','Terciario'],datasets:[{data:[20056,12857,2299,550],backgroundColor:[C.n,C.r,C.o,C.g],borderWidth:3,borderColor:'rgba(8,15,30,0.92)'}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{position:'bottom'},tooltip:{callbacks:{label(c){const p=((c.parsed/35762)*100).toFixed(1);return ` ${c.label}: ${c.parsed.toLocaleString('es-AR')} visitantes (${p}%)`}}}}},plugins:[{afterDatasetsDraw(chart){const ctx=chart.ctx,{width,height}=chart;ctx.save();ctx.font='800 17px Encode Sans';ctx.fillStyle='#d9e5f2';ctx.textAlign='center';ctx.textBaseline='middle';ctx.fillText('35.762',width/2,height/2-12);ctx.font='11px Titillium Web';ctx.fillStyle='#F0E6CC';ctx.fillText('visitantes',width/2,height/2+8);ctx.restore();}}]});
+
+// 4 INST PROM
+new Chart('ch-inst-prom',{type:'bar',data:{labels:['Terciario','Universidad','Colegio','Otros'],datasets:[{data:[50,35,31,12],backgroundColor:[C.g,C.o,C.r,C.v],borderRadius:6}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},scales:{x:{grid:{display:false}},y:{grid:{color:'rgba(212,168,67,0.12)'},beginAtZero:true}}},plugins:[{afterDatasetsDraw(chart){const ctx=chart.ctx;chart.data.datasets.forEach((ds,di)=>{chart.getDatasetMeta(di).data.forEach((bar,i)=>{ctx.save();ctx.fillStyle='#fff';ctx.font='600 13px Titillium Web';ctx.textAlign='center';ctx.textBaseline='middle';ctx.fillText(ds.data[i],bar.x,bar.y+18);ctx.restore();});});}}]});
+
+// 4 INST SIN OTROS
+(function(){
+  const total=15706,data=[12857,2299,550],pcts=data.map(v=>((v/total)*100).toFixed(1));
+  new Chart('ch-inst-sin-otros',{type:'doughnut',data:{labels:['Colegio','Universidad','Terciario'],datasets:[{data,backgroundColor:[C.r,C.g,C.d],borderWidth:3,borderColor:'rgba(8,15,30,0.92)',hoverOffset:8}]},options:{responsive:true,maintainAspectRatio:false,cutout:'62%',plugins:{legend:{display:false},tooltip:{callbacks:{label(c){return ` ${c.label}: ${c.parsed.toLocaleString('es-AR')} (${pcts[c.dataIndex]}%)`}}}}},plugins:[{afterDatasetsDraw(chart){const ctx=chart.ctx,{width,height}=chart;ctx.save();ctx.font='800 28px Encode Sans';ctx.fillStyle=C.r;ctx.textAlign='center';ctx.textBaseline='middle';ctx.fillText('81,9%',width/2,height/2-12);ctx.font='12px Titillium Web';ctx.fillStyle='#F0E6CC';ctx.fillText('Colegios',width/2,height/2+14);ctx.restore();chart.data.datasets.forEach((ds,di)=>{chart.getDatasetMeta(di).data.forEach((arc,i)=>{const angle=(arc.startAngle+arc.endAngle)/2,r=arc.outerRadius*0.78,x=arc.x+Math.cos(angle)*r,y=arc.y+Math.sin(angle)*r;ctx.save();ctx.font='600 12px Titillium Web';ctx.fillStyle='#fff';ctx.textAlign='center';ctx.textBaseline='middle';ctx.fillText(pcts[i]+'%',x,y);ctx.restore();});});}}]});
+})();
+
+// 5 GUÍAS
+new Chart('ch-guias-bar',{type:'bar',data:{labels:['Pablo','Valen','Seba','Nahue','Guille','Poli','Mauri','Norma','Julian','Agustín'],datasets:[{data:[4264,3725,3037,2695,2034,1952,144,108,73,68],backgroundColor:[C.r,C.r,C.b,C.b,C.o,C.o,C.g,C.g,C.v,C.d],borderRadius:6}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},scales:{y:{grid:{color:'rgba(212,168,67,0.12)'},beginAtZero:true},x:{grid:{display:false}}}},plugins:[topBarPlugin()]});
+
+// 6 DÍA
+new Chart('ch-dia-bar',{type:'bar',data:{labels:['Lunes','Martes','Miércoles','Jueves','Viernes','Sábado','Domingo'],datasets:[{data:[0,730,8403,8415,8186,9344,684],backgroundColor:[C.n,C.v,C.b,C.r,C.o,C.g,C.d],borderRadius:6}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},scales:{y:{grid:{color:'rgba(212,168,67,0.12)'},beginAtZero:true},x:{grid:{display:false}}}},plugins:[topBarPlugin()]});
+
+// 6 HORA
+new Chart('ch-hora-bar',{type:'bar',data:{labels:['10:00','11:00','12:00','13:00','14:00','15:00','16:00'],datasets:[{data:[6072,5530,5545,4015,6511,5844,2245],backgroundColor:[C.b,C.g,C.v,C.d,C.r,C.b,C.n],borderRadius:6}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},scales:{y:{grid:{color:'rgba(212,168,67,0.12)'},beginAtZero:true},x:{grid:{display:false}}}},plugins:[topBarPlugin()]});
+
+// 6 SEMANA LINE
+new Chart('ch-semana-line',{type:'line',data:{labels:[1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24,25,26,27,28,29,30,31,32,33,34,35,36,37,39,40,41,42,43,44,45,46,47,48,49,50,51],datasets:[{data:[501,851,468,290,517,422,520,573,287,364,897,1190,908,521,742,519,919,130,1089,364,800,878,1034,1032,614,605,738,513,767,769,238,837,648,861,936,877,937,1317,823,787,1148,1211,1451,952,923,593,533,401,318,149],borderColor:C.r,backgroundColor:'rgba(41, 78, 138, 0.20)',borderWidth:2,pointRadius:2,fill:true,tension:0.3}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},scales:{y:{grid:{color:'rgba(212,168,67,0.12)'},beginAtZero:true},x:{title:{display:true,text:'Semana ISO'},grid:{display:false}}}}});
+
+// 7 NAC TOP20
+const nL=['EE.UU.','Italia','Brasil','España','Francia','R. Unido','Alemania','Colombia','Holanda','México','Chile','Canadá','Australia','Perú','Ecuador','Uruguay','Suiza','Rusia','Bélgica','Venezuela'];
+const nD=[904,451,429,364,298,245,244,177,171,133,104,89,72,62,60,52,43,41,33,29];
+const palette20=[C.r,C.b,C.g,C.o,C.v,C.d,'#1D4ED8','#0B5E58','#15803D','#B45309','#6D28D9','#162548','#2A5AA8','#146C63','#2F855A','#C07A12','#5B33B5','#20345F','#3C6DB6','#1E7A70','#3A9460','#D4A843','#7F68C4','#2A4A73','#0E635D','#8B5CF6'];
+new Chart('ch-nac-top20',{type:'bar',data:{labels:nL,datasets:[{data:nD,backgroundColor:palette20,borderRadius:5}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},scales:{y:{grid:{color:'rgba(212,168,67,0.12)'},beginAtZero:true},x:{grid:{display:false},ticks:{font:{size:11}}}}},plugins:[topBarPlugin()]});
+
+// 7 REGIÓN PIE
+new Chart('ch-region-pie',{type:'doughnut',data:{labels:['Europa','Am. del Norte','Am. del Sur','Am. Central/Caribe','Oceanía','Asia'],datasets:[{data:[2043,993,923,143,84,46],backgroundColor:[C.r,C.b,C.g,C.o,C.v,C.d],borderWidth:2,borderColor:'rgba(8,15,30,0.92)'}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{position:'right',labels:{boxWidth:10,padding:10,font:{size:12}}},tooltip:{callbacks:{label(c){const p=((c.parsed/4232)*100).toFixed(1);return ` ${c.parsed} personas (${p}%)`}}}}},plugins:[{afterDatasetsDraw(chart){const ctx=chart.ctx,{width,height}=chart;ctx.save();ctx.font='800 22px Encode Sans';ctx.fillStyle=C.r;ctx.textAlign='center';ctx.textBaseline='middle';ctx.fillText('48%',width/2-60,height/2-10);ctx.font='11px Titillium Web';ctx.fillStyle='#F0E6CC';ctx.fillText('Europa',width/2-60,height/2+10);ctx.restore();}}]});
+
+// 7 NAC PCT
+const t10n=['EE.UU.','Italia','Brasil','España','Francia','R. Unido','Alemania','Colombia','Holanda','México'];
+const t10v=[904,451,429,364,298,245,244,177,171,133];
+const t10p=t10v.map(v=>((v/4296)*100).toFixed(1));
+new Chart('ch-nac-pct',{type:'bar',data:{labels:t10n,datasets:[{data:t10p,backgroundColor:palette20.slice(0,10),borderRadius:5}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},scales:{y:{grid:{color:'rgba(212,168,67,0.12)'},beginAtZero:true,ticks:{callback:v=>v+'%'}},x:{grid:{display:false}}}},plugins:[{afterDatasetsDraw(chart){const ctx=chart.ctx;chart.data.datasets.forEach((ds,di)=>{chart.getDatasetMeta(di).data.forEach((bar,i)=>{ctx.save();ctx.fillStyle='rgba(240,230,204,0.76)';ctx.font='600 11px Titillium Web';ctx.textAlign='center';ctx.fillText(ds.data[i]+'%',bar.x,bar.y-7);ctx.restore();});});}}]});
+
+// 8 INST x TIPO
+new Chart('ch-inst-tipo',{type:'bar',data:{labels:['Colegio','Otros','Universidad','Terciario'],datasets:[{label:'Programada',data:[9901,3554,1886,360],backgroundColor:C.r,borderRadius:4},{label:'Espontánea',data:[2228,4810,395,187],backgroundColor:C.o,borderRadius:4}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{position:'bottom'}},scales:{x:{grid:{display:false}},y:{grid:{color:'rgba(212,168,67,0.12)'},beginAtZero:true}}},plugins:[topBarPlugin()]});
+
+// 8 DÍA x TIPO
+new Chart('ch-dia-tipo',{type:'bar',data:{labels:['Martes','Miércoles','Jueves','Viernes','Sábado'],datasets:[{label:'Programada',data:[350,6200,6500,5800,2800],backgroundColor:C.r,borderRadius:4},{label:'Espontánea',data:[380,2200,1900,2400,6500],backgroundColor:C.o,borderRadius:4}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{position:'bottom'}},scales:{x:{grid:{display:false}},y:{grid:{color:'rgba(212,168,67,0.12)'},beginAtZero:true}}}});
+
+// 8 HEATMAP
+new Chart('ch-heatmap',{type:'bar',data:{labels:['Ene','Feb','Mar','Abr','May','Jun','Jul','Ago','Sep','Oct','Nov','Dic'],datasets:[{label:'ENTE',data:[761,617,1086,258,470,718,499,906,968,1044,1056,245],backgroundColor:C.d,borderRadius:3},{label:'Extranjero',data:[548,351,305,435,559,585,260,491,190,972,655,258],backgroundColor:C.r,borderRadius:3},{label:'Residente',data:[226,259,767,803,440,533,949,430,691,735,515,44],backgroundColor:C.g,borderRadius:3}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{position:'bottom'}},scales:{x:{grid:{display:false}},y:{grid:{color:'rgba(212,168,67,0.12)'},beginAtZero:true}}}});
+
+// 9 BUBBLE
+const gBub=[{x:4264,y:14.1,r:18,l:'Pablo'},{x:3725,y:15.8,r:16,l:'Valen'},{x:3037,y:13.2,r:14,l:'Seba'},{x:2695,y:12.4,r:13,l:'Nahue'},{x:2034,y:19.2,r:11,l:'Guille'},{x:1952,y:16.1,r:11,l:'Poli'},{x:144,y:8.5,r:5,l:'Mauri'},{x:108,y:9.8,r:4,l:'Norma'}];
+const bC=[C.r,C.r,C.b,C.b,C.o,C.g,C.v,C.d];
+new Chart('ch-bubble',{type:'bubble',data:{datasets:gBub.map((d,i)=>({label:d.l,data:[{x:d.x,y:d.y,r:d.r}],backgroundColor:bC[i]+'bb',borderColor:bC[i],borderWidth:1.5}))},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{position:'right',labels:{boxWidth:10,font:{size:12}}},tooltip:{callbacks:{label(c){return ` ${c.dataset.label}: ${c.parsed.x.toLocaleString('es-AR')} vis., prom ${c.parsed.y}/visita`}}}},scales:{x:{title:{display:true,text:'Visitantes totales'},grid:{color:'rgba(212,168,67,0.12)'}},y:{title:{display:true,text:'Promedio visitantes/visita'},grid:{color:'rgba(212,168,67,0.12)'},beginAtZero:true}}},plugins:[{afterDatasetsDraw(chart){const ctx=chart.ctx;chart.data.datasets.forEach((ds,di)=>{chart.getDatasetMeta(di).data.forEach(pt=>{ctx.save();ctx.fillStyle='#d9e5f2';ctx.font='600 11px Titillium Web';ctx.textAlign='center';ctx.textBaseline='middle';ctx.fillText(ds.label,pt.x,pt.y);ctx.restore();});});}}]});
+
+// 9 RES vs EXT
+new Chart('ch-res-ext-bar',{type:'bar',data:{labels:['Resid.\nAutoguiados','Resid.\nAudioguías','Extr.\nAutoguiados','Extr.\nAudioguías'],datasets:[{data:[5643,75,3867,643],backgroundColor:[C.g,C.g,C.r,C.r],borderRadius:6}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},scales:{y:{grid:{color:'rgba(212,168,67,0.12)'},beginAtZero:true},x:{grid:{display:false}}}},plugins:[topBarPlugin()]});
+
+// 9 ÍNDICE PROG
+const prog=[298,174,1024,1436,1846,1834,1146,1837,1526,3058,1402,120];
+const totM=[2502,1846,3440,2831,3131,3285,3025,3282,3131,5016,3405,868];
+const idx=prog.map((p,i)=>Math.round(p/totM[i]*100));
+new Chart('ch-indice-prog',{type:'line',data:{labels:['Ene','Feb','Mar','Abr','May','Jun','Jul','Ago','Sep','Oct','Nov','Dic'],datasets:[{data:idx,borderColor:C.r,backgroundColor:'rgba(37, 99, 235, 0.18)',borderWidth:2.5,pointRadius:6,pointBackgroundColor:C.r,fill:true,tension:0.3}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},scales:{y:{grid:{color:'rgba(212,168,67,0.12)'},min:0,max:100,ticks:{callback:v=>v+'%'}},x:{grid:{display:false}}}},plugins:[{afterDatasetsDraw(chart){const ctx=chart.ctx;chart.data.datasets.forEach((ds,di)=>{chart.getDatasetMeta(di).data.forEach((pt,i)=>{ctx.save();ctx.fillStyle=C.r;ctx.font='600 12px Titillium Web';ctx.textAlign='center';ctx.fillText(ds.data[i]+'%',pt.x,pt.y-10);ctx.restore();});});}}]});
+
+// 7 MAPA MUNDIAL — SVG + D3 vía CDN
+(function(){
+  const countryVisitors = {
+    'United States of America':904,'Italy':451,'Brazil':429,'Spain':364,'France':298,
+    'United Kingdom':245,'Germany':244,'Colombia':177,'Netherlands':171,'Mexico':133,
+    'Chile':104,'Canada':89,'Australia':72,'Peru':62,'Ecuador':60,'Uruguay':52,
+    'Switzerland':43,'Russia':41,'Belgium':33,'Venezuela':29,'Japan':26,'Sweden':22,
+    'Denmark':21,'Ireland':19,'Greece':18,'Norway':16,'Austria':16,'Poland':14,
+    'China':12,'New Zealand':12,'Costa Rica':10,'Paraguay':10,'Israel':8,'Portugal':8,
+    'Taiwan':7,'Hungary':6,'Finland':6,'India':5,'Romania':5,'Iran':4,'Bolivia':4,
+    'Guatemala':4,'Honduras':4,'Cuba':3,'El Salvador':3,'Croatia':2,
+    'Dominican Republic':2,'Lebanon':2,'Singapore':1,'Nicaragua':1,
+    'Philippines':1,'Turkey':1,'South Korea':1,'Thailand':1,'Panama':1,
+  };
+  const maxVal = 904;
+
+  function blueColor(v) {
+    if (!v) return '#243854';
+    const t = Math.pow(v / maxVal, 0.42);
+    const r = Math.round(36 + t*58);
+    const g = Math.round(56 + t*52);
+    const b = Math.round(84 + t*90);
+    return `rgb(${r},${g},${b})`;
+  }
+
+  const wrap = document.getElementById('worldmap-wrap');
+
+  // Load D3 + topojson then draw
+  function loadScript(src, cb) {
+    const s = document.createElement('script');
+    s.src = src; s.onload = cb; document.head.appendChild(s);
+  }
+
+  loadScript('https://cdnjs.cloudflare.com/ajax/libs/d3/7.8.5/d3.min.js', () => {
+    loadScript('https://cdnjs.cloudflare.com/ajax/libs/topojson/3.0.2/topojson.min.js', () => {
+      fetch('https://cdn.jsdelivr.net/npm/world-atlas@2/countries-110m.json')
+        .then(r => r.json())
+        .then(world => drawMap(world))
+        .catch(() => {
+          wrap.innerHTML = '<div style="display:flex;align-items:center;justify-content:center;height:100%;color:#635d56;font-size:14px;">No se pudo cargar el mapa. Se requiere conexión a internet.</div>';
+        });
+    });
+  });
+
+  // name mapping from ISO numeric id to country name used in our data
+  const idToName = {
+    840:'United States of America',380:'Italy',76:'Brazil',724:'Spain',250:'France',
+    826:'United Kingdom',276:'Germany',170:'Colombia',528:'Netherlands',484:'Mexico',
+    152:'Chile',124:'Canada',36:'Australia',604:'Peru',218:'Ecuador',858:'Uruguay',
+    756:'Switzerland',643:'Russia',56:'Belgium',862:'Venezuela',392:'Japan',752:'Sweden',
+    208:'Denmark',372:'Ireland',300:'Greece',578:'Norway',40:'Austria',616:'Poland',
+    156:'China',554:'New Zealand',188:'Costa Rica',600:'Paraguay',376:'Israel',
+    620:'Portugal',158:'Taiwan',348:'Hungary',246:'Finland',356:'India',642:'Romania',
+    364:'Iran',68:'Bolivia',320:'Guatemala',340:'Honduras',192:'Cuba',222:'El Salvador',
+    191:'Croatia',214:'Dominican Republic',422:'Lebanon',702:'Singapore',558:'Nicaragua',
+    608:'Philippines',792:'Turkey',410:'South Korea',764:'Thailand',591:'Panama',
+  };
+
+  function drawMap(world) {
+    const W = wrap.clientWidth, H = wrap.clientHeight;
+
+    const svg = d3.select(wrap).append('svg')
+      .attr('width', W).attr('height', H)
+      .style('display','block');
+
+    const projection = d3.geoNaturalEarth1()
+      .scale(W / 6.2)
+      .translate([W / 2, H / 2]);
+
+    const path = d3.geoPath().projection(projection);
+    const countries = topojson.feature(world, world.objects.countries);
+
+    // ocean background
+    svg.append('rect').attr('width',W).attr('height',H).attr('fill','#e3eaee').attr('rx',8);
+
+    // graticule
+    svg.append('path')
+      .datum(d3.geoGraticule()())
+      .attr('d', path)
+      .attr('fill','none')
+      .attr('stroke','rgba(102,126,148,0.12)')
+      .attr('stroke-width',0.5);
+
+    // tooltip
+    const tip = d3.select(wrap).append('div')
+      .style('position','absolute').style('background','rgba(26,20,16,0.88)')
+      .style('color','#fff').style('padding','7px 12px').style('border-radius','6px')
+      .style('font-size','13px').style('font-family','Titillium Web, sans-serif')
+      .style('pointer-events','none').style('display','none').style('white-space','nowrap')
+      .style('z-index','10').style('box-shadow','0 2px 8px rgba(0,0,0,0.3)');
+
+    svg.selectAll('path.country')
+      .data(countries.features)
+      .join('path')
+      .attr('class','country')
+      .attr('d', path)
+      .attr('fill', d => {
+        const name = idToName[+d.id];
+        const v = name ? countryVisitors[name] : 0;
+        return blueColor(v || 0);
+      })
+      .attr('stroke','#fff')
+      .attr('stroke-width', 0.4)
+      .on('mousemove', function(event, d) {
+        const name = idToName[+d.id];
+        const v = name ? (countryVisitors[name] || 0) : 0;
+        if (!name) return;
+        const [mx, my] = d3.pointer(event, wrap);
+        const label = v > 0
+          ? `<strong>${name}</strong><br>${v.toLocaleString('es-AR')} visitantes`
+          : `<strong>${name}</strong><br>Sin registros`;
+        tip.style('display','block')
+           .html(label)
+           .style('left', (mx + 14) + 'px')
+           .style('top',  (my - 10) + 'px');
+        d3.select(this).attr('stroke','#1a1410').attr('stroke-width',1.2);
+      })
+      .on('mouseleave', function() {
+        tip.style('display','none');
+        d3.select(this).attr('stroke','#fff').attr('stroke-width',0.4);
+      });
+  }
+})();
+
+
+// Navegación robusta para enlaces internos
+(function(){
+  const tocLinks = Array.from(document.querySelectorAll('.toc-links a[href^="#"]'));
+  const sections = tocLinks.map(a => document.querySelector(a.getAttribute('href'))).filter(Boolean);
+
+  tocLinks.forEach(link => {
+    link.addEventListener('click', (ev) => {
+      const target = document.querySelector(link.getAttribute('href'));
+      if (!target) return;
+      ev.preventDefault();
+      target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      history.replaceState(null, '', link.getAttribute('href'));
+    });
+  });
+
+  const setActive = () => {
+    const y = window.scrollY + 120;
+    let current = sections[0];
+    for (const sec of sections) {
+      if (sec.offsetTop <= y) current = sec;
+    }
+    tocLinks.forEach(a => a.classList.toggle('active', current && a.getAttribute('href') === `#${current.id}`));
+  };
+
+  window.addEventListener('scroll', setActive, { passive: true });
+  window.addEventListener('load', setActive);
+  setActive();
+})();
+
+</script>
+</body>
+</html>
